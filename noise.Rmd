@@ -37,11 +37,6 @@ plot_feature_by_class <- function(df, feature) {
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
-plot_nominal_feature_by_class <- function(df, feature) {
-  
-  p <- ggplot(df, aes(x=feature, y=len)) + 
-  geom_boxplot()
-}
 
 features <- c(
   "cap_shape",
@@ -61,11 +56,6 @@ features <- c(
   "spore_print_color",
   "habitat",
   "season"
-)
-nominal_features <- c(
-  "cap-diameter",
-  "stem-height",
-  "stem-width"
 )
 ```
 
@@ -87,12 +77,7 @@ for (f in features) {
   cat("After Noise Removal\n")
   print(plot_feature_by_class(train_clean, f))
   
-for (f in nominal_features) {
-  cat("Feature:", f, "\n")
-  
-  cat("Outlier Visualization\n")
-  print(plot_nominal_feature_by_class(train_raw, f))
-}
 }
 ```
+
 
