@@ -8,18 +8,34 @@ Uses the [Poisonous Mushrooms Competition Data Set](https://www.kaggle.com/compe
 - Evan Mcintyre
 - Alexander Redd
 - Travis Schowen
-- 
+
 ## About the Dataset
 The goal for this project is to predict whether a mushroom is poisonous or edible using its physical and categorical features. To successfully complete this, a binary machine learning model will be developed to accurately classify mushrooms into the two categories. This project is based on the Kaggle competition Binary Prediction of Poisonous Mushrooms. The dataset for this problem was synthetically generated from a deep learning model trained on the UCI Mushroom dataset, creating slight differences from the original data. The model’s performance might be evaluated on accuracy, precision, recall, F1-Score, ROC, and log loss. These performance measures will be used to show how accurately the model can differentiate between edible and poisonous mushrooms, as well as how confident and reliable its predictions are.  
 
 Classifying mushrooms as either edible or poisonous is important in the real world for public safety and health, most notably for foragers or biologists. If a mushroom is incorrectly classified as safe, there could be deadly consequences, so accuracy is essential. With a better solution to this problem, mushrooms in the wild could be much safer, as it would allow for more reliable recognition of which are poisonous and which are edible. The original mushroom dataset from UC Irvine has been used in data science and machine learning projects.  
 
+## Tools
+- R
+- Ranger Package for R
+- Light GBM
+
 ## Cleaning the Data
 
 #### Removing Noise
 Some of the features within the given test data set contain noisy values. For example, where a categorical value is expected, a numerical one is found within a few rows. To get rid of noise, we take all categorical features and replace any noisy value (a value which appears less than 100 times within the 3 million entries) with N/A.
-The visualization and R script for this can be found within the noise.Rmd and noise.pdf files. 
+We then replaced all of the categorical values that we set as NA to the mode from the training set. (except for gill_color, more on that later)
+The visualization and R script for this can be found within the noise.Rmd and noise_visualization.pdf files. 
 
 #### Removing Outliers
 Outliers for the numerical values were identified by looking at a boxplot and using the whiskers to handle them by removal. We loaded the data using R and used it to clean and visualize the dataset.  We used R’s native features to summarize, analyze and clean the data including boxplots to find outliers. 
-The visualization and R script for this can be found within outlier.Rmd and outlier.pdf files.
+We then replaced all of the numerical values that we set as NA to the median from the training set.
+The visualization and R script for this can be found within outlier.Rmd and outlier_visualization.pdf files.
+
+#### Removing Missing Features
+Some features were missing in 80% or more of the entries provided. For those features, we decided to use dimensionality reduction and remove those features instead of trying to impute them. Visualization for missing data can be seen in noise_visualization.pdf.
+
+#### Imputing Missing Values
+We trained a k-nearest neighbors' model for ‘gill.color’ feature to impute the missing values based on the mushrooms with similar data in the other features. This was to create a ‘proof of concept’ using k-nearest neighbor. When doing this, we used all predictors except for class to impute ‘gill.color’. After finding good results using kNN, we used kNN to impute all the NA columns using values based on mushrooms with similar data in the other features.
+
+## Training Our Model
+We trained a model using LightGBM, which gave us a ‘gradient-boosted decision tree’, and tested this against the test data.  Kaggle gave us a Matthews correlation coefficient (MCC) of 0.98232, indicating a very strong correlation between our predictions and the true labels.
