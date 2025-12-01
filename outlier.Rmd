@@ -1,0 +1,63 @@
+---
+title: "Mushroom Numerical Outlier Removal Visualization"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(readr)
+library(dplyr)
+
+train_raw <- read_csv("train.csv")
+
+names(train_raw) <- gsub("-", "_", names(train_raw))
+
+#Outlier Removal Function (IQR Method)
+remove_outliers_iqr <- function(df, feature) {
+  Q1 <- quantile(df[[feature]], 0.25, na.rm = TRUE)
+  Q3 <- quantile(df[[feature]], 0.75, na.rm = TRUE)
+  IQR_val <- Q3 - Q1
+
+  lower <- Q1 - 1.5 * IQR_val
+  upper <- Q3 + 1.5 * IQR_val
+
+  df[df[[feature]] >= lower & df[[feature]] <= upper, , drop = FALSE]
+}
+
+# Plot Function: Numerical Feature by Class
+plot_feature_by_class_numeric <- function(df, feature) {
+  ggplot(df, aes_string(x = "class", y = feature, fill = "class")) +
+    geom_boxplot(outlier.shape = NA) +
+    labs(
+      title = paste("Distribution of", feature, "by class"),
+      x = "class",
+      y = feature
+    ) +
+    theme_minimal()
+}
+
+# Numerical features to process
+numeric_features <- c(
+  "cap_diameter",
+  "stem_height",
+  "stem_width"
+)
+```
+
+```{r visualize, echo=FALSE, warning=FALSE, message=FALSE}
+# Loop through each numerical feature and show before/after outlier removal
+for (f in numeric_features) {
+
+  cat("## Feature:", f, "\n")
+
+  # --- Before Outlier Removal ---
+  cat("### Before Outlier Removal\n")
+  print(plot_feature_by_class_numeric(train_raw, f))
+
+  # --- Cleaned Version ---
+  train_clean <- remove_outliers_iqr(train_raw, f)
+
+  # --- After Outlier Removal ---
+  cat("### After Outlier Removal\n")
+  print(plot_feature_by_class_numeric(train_clean, f))
+}
