@@ -1,0 +1,98 @@
+---
+title: "Mushroom Feature Noise Replacement Visualization"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(readr)
+library(dplyr)
+
+train_raw <- read_csv("train.csv")
+
+names(train_raw) <- gsub("-", "_", names(train_raw))
+
+remove_noise <- function(df, feature, min_count = 100) {
+  freq_table <- table(df[[feature]])
+  valid_categories <- names(freq_table[freq_table >= min_count])
+  
+  # Replace values that appear fewer than min_count times with NA
+  df[[feature]] <- ifelse(df[[feature]] %in% valid_categories, df[[feature]], NA)
+  
+  return(df)
+}
+
+
+plot_feature_by_class <- function(df, feature) {
+  # Convert to factor and include NA as a category
+  df[[feature]] <- factor(df[[feature]], exclude = NULL)
+  
+  ggplot(df, aes_string(x = feature, fill = "class")) +
+    geom_bar(position = "dodge", na.rm = FALSE) +
+    labs(
+      title = paste("Distribution of", feature, "by class"),
+      x = feature,
+      y = "Count"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+plot_nominal_feature_by_class <- function(df, feature) {
+  
+  p <- ggplot(df, aes(x=feature, y=len)) + 
+  geom_boxplot()
+}
+
+features <- c(
+  "cap_shape",
+  "cap_surface",
+  "cap_color",
+  "does_bruise_or_bleed",
+  "gill_attachment",
+  "gill_spacing",
+  "gill_color",
+  "stem_root",
+  "stem_surface",
+  "stem_color",
+  "veil_type",
+  "veil_color",
+  "has_ring",
+  "ring_type",
+  "spore_print_color",
+  "habitat",
+  "season"
+)
+nominal_features <- c(
+  "cap-diameter",
+  "stem-height",
+  "stem-width"
+)
+```
+
+```{r visualize, echo=FALSE, warning=FALSE, message=FALSE}
+# Loop through each feature and show before and after noise removal
+for (f in features) {
+
+  # Print the feature name as a Markdown header
+  cat("Feature:", f, "\n")
+
+  # --- Before Noise Removal ---
+  cat("Before Noise Removal\n")
+  print(plot_feature_by_class(train_raw, f))
+
+  # --- Remove noise for this feature ---
+  train_clean <- remove_noise(train_raw, f)
+
+  # --- After Noise Removal ---
+  cat("After Noise Removal\n")
+  print(plot_feature_by_class(train_clean, f))
+  
+for (f in nominal_features) {
+  cat("Feature:", f, "\n")
+  
+  cat("Outlier Visualization\n")
+  print(plot_nominal_feature_by_class(train_raw, f))
+}
+}
+```
+
